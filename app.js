@@ -20,13 +20,15 @@ function atualizar(){
     const n = r.paradas.length;
     st.className = "status good";
     st.innerHTML = `<strong>${n}</strong><span>${n === 1 ? "parada de recarga" : "paradas de recarga"}</span>`;
-    $("sub").textContent = n === 0 ? "O carro chega ao destino sem recarregar." : "Esse é o menor número possível de paradas para esta rota.";
+    $("sub").textContent = n === 0 ? "Dá para ir direto, sem recarregar." : "Esse é o menor número possível de paradas para esta rota.";
     $("msg").innerHTML = "";
   } else {
     st.className = "status bad";
     st.innerHTML = `<strong>Rota inviável</strong>`;
     $("sub").textContent = "";
-    $("msg").innerHTML = `<div class="msg">Não há estação alcançável entre o km ${Math.round(b[r.bloqueio])} e o km ${Math.round(b[r.bloqueio+1])} (trecho de ${km(b[r.bloqueio+1]-b[r.bloqueio])}). Aumente a autonomia ou a bateria, ou reduza a reserva.</div>`;
+    const alcanceTrecho = r.bloqueio === 0 ? r.c1 : r.c2;
+    const faltam = Math.round((b[r.bloqueio+1] - b[r.bloqueio]) - alcanceTrecho);
+    $("msg").innerHTML = `<div class="msg">O carro não chega à próxima estação: faltam ${faltam} km de autonomia entre o km ${Math.round(b[r.bloqueio])} e o km ${Math.round(b[r.bloqueio+1])}. Aumente a autonomia ou a bateria, ou reduza a reserva.</div>`;
   }
   $("sub").textContent += (($("sub").textContent ? " " : "") + `Alcance útil: ${km(r.c1)} no primeiro trecho e ${km(r.c2)} nos demais.`);
 
@@ -64,7 +66,7 @@ function atualizar(){
     linhas += `<tr><td>${nome(a)}</td><td>${nome(c)}</td><td class="r">${km(d)}</td><td class="r">${Math.round(restante*100)}%</td></tr>`;
     carga = 1;
   });
-  if (!r.viavel) linhas += `<tr><td>${nome(r.bloqueio)}</td><td>${nome(r.bloqueio+1)}</td><td class="r">${km(b[r.bloqueio+1]-b[r.bloqueio])}</td><td class="r" style="color:var(--bad)">inalcançável</td></tr>`;
+  if (!r.viavel) linhas += `<tr><td>${nome(r.bloqueio)}</td><td>${nome(r.bloqueio+1)}</td><td class="r">${km(b[r.bloqueio+1]-b[r.bloqueio])}</td><td class="r" style="color:var(--bad)">sem bateria</td></tr>`;
   $("tbody").innerHTML = linhas;
 }
 
