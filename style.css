@@ -1,0 +1,33 @@
+  :root{--bg:#EEF2F5;--ink:#12263A;--muted:#5B6B7A;--card:#fff;--line:#D5DEE6;--ok:#1E8E5A;--bad:#D64545;--road:#2B3A4A;--skip:#A9B6C2}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+  header{padding:28px 20px 8px;max-width:1080px;margin:0 auto}
+  h1{margin:0;font-size:1.7rem;letter-spacing:-.01em}
+  header p{margin:4px 0 0;color:var(--muted);max-width:62ch}
+  main{max-width:1080px;margin:0 auto;padding:16px 20px 40px;display:grid;grid-template-columns:280px 1fr;gap:20px}
+  @media(max-width:820px){main{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px}
+  label{display:block;font-weight:600;font-size:.92rem;margin-top:14px}
+  label:first-child{margin-top:0}
+  .val{float:right;font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
+  select,input[type=range]{width:100%;margin-top:6px}
+  select{padding:8px;border:1px solid var(--line);border-radius:6px;font:inherit;background:#fff}
+  input[type=range]{accent-color:var(--ok)}
+  .hint{font-size:.82rem;color:var(--muted);margin-top:16px;line-height:1.4}
+  .status{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .status strong{font-size:2.1rem;line-height:1}
+  .status.bad strong{color:var(--bad)}
+  .status.good strong{color:var(--ok)}
+  .sub{color:var(--muted);font-size:.9rem;margin:4px 0 0}
+  .msg{margin:12px 0 0;padding:10px 12px;border-left:4px solid var(--bad);background:#FDEEEE;border-radius:4px;font-size:.92rem}
+  .viz{overflow-x:auto;margin-top:8px}
+  svg{width:100%;min-width:640px;height:auto;display:block}
+  svg text{font-family:inherit}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.85rem;color:var(--muted);margin-top:6px}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:.92rem;font-variant-numeric:tabular-nums}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+  th{font-weight:600;color:var(--muted);font-size:.84rem}
+  td.r,th.r{text-align:right}
+  .full{grid-column:1/-1}
+  :focus-visible{outline:3px solid #3B82F6;outline-offset:2px}
