@@ -86,8 +86,119 @@ O detalhamento dessas limitações está em [Limitações](#limitações).
 
 ## Prova de otimalidade
 
+**Enunciado.** Se a rota é viável, o guloso chega a `L` com o menor número possível de
+paradas. Se o guloso declara a rota inviável, então nenhuma solução existe.
+
+**O que é uma solução válida.** Uma lista de paradas o_1 < o_2 < … < o_m, escolhidas entre
+os b_i, tal que (com o_0 = 0):
+
+- o primeiro trecho cabe em C₁: o_1 − 0 ≤ C₁ (ou `L` ≤ C₁, se m = 0);
+- cada trecho seguinte cabe em C₂: o_{k+1} − o_k ≤ C₂, e também `L` − o_m ≤ C₂.
+
+Como a bateria inicial é no máximo 1, vale C₁ ≤ C₂.
+
+### Corretude da inviabilidade
+
+O guloso para com `bloqueio = i` quando, estando em b_i, nem o ponto seguinte b_{i+1} é
+alcançável: b_{i+1} − b_i > alcance, onde o alcance é C₁ se i = 0 (o carro ainda não saiu
+da origem) e C₂ se i > 0.
+
+Entre b_i e b_{i+1} não há nenhum eletroposto, porque os pontos estão ordenados e são
+consecutivos. Então qualquer solução precisa atravessar esse trecho num único salto: sair de
+algum ponto x ≤ b_i e só parar de novo em algum y ≥ b_{i+1}. Esse salto mede
+y − x ≥ b_{i+1} − b_i.
+
+- Se i = 0, o salto sai obrigatoriamente da origem, com alcance C₁ < b_1 − b_0.
+- Se i > 0, o salto tem alcance no máximo C₂ (ou C₁ ≤ C₂, se sair da origem), e
+  b_{i+1} − b_i > C₂.
+
+Nos dois casos o salto é maior que a autonomia disponível, logo nenhuma solução existe. Em
+particular, quando a bateria inicial não passa da reserva, C₁ = 0 e a rota é inviável já no
+primeiro trecho, o que está certo: o carro não pode sair sem ficar abaixo da reserva.
+
+Consequência usada a seguir: **se a rota é viável, o guloso nunca trava** e sempre chega a
+`L`.
+
+### Greedy stays ahead
+
+Suponha a rota viável. Sejam g_1 < g_2 < … < g_p as paradas do guloso e o_1 < … < o_m as de
+uma solução ótima qualquer (m mínimo), com g_0 = o_0 = 0.
+
+**Lema.** Para todo k ≤ min(p, m), vale g_k ≥ o_k.
+
+- **Base (k = 1).** A solução ótima sai de 0 e precisa alcançar o_1, então o_1 ≤ C₁. O
+  guloso escolhe como g_1 o ponto mais distante dentro de C₁, e o_1 é um desses pontos.
+  Logo g_1 ≥ o_1.
+- **Passo.** Se g_k ≥ o_k, então o_{k+1} ≤ o_k + C₂ ≤ g_k + C₂. Ou seja, o_{k+1} é
+  alcançável a partir de g_k (se o_{k+1} ≤ g_k, a desigualdade vale direto, porque
+  g_{k+1} > g_k). Como o guloso escolhe o ponto mais distante alcançável, g_{k+1} ≥ o_{k+1}.
+
+**Conclusão.** Suponha, por absurdo, que o guloso use p > m paradas. Então g_m existe e,
+pelo lema, g_m ≥ o_m. A solução ótima termina em `L` a partir de o_m, então
+`L` − g_m ≤ `L` − o_m ≤ alcance (C₂, ou C₁ se m = 0). Assim `L` é alcançável a partir de
+g_m, e como `L` = b_n é o ponto mais distante da rota, o guloso iria direto para ele sem
+fazer outra parada, ou seja, p = m. Contradição. Logo p ≤ m. Como nenhuma solução usa menos
+paradas que a ótima, p = m e o guloso é ótimo.
+
+### Onde isso está no código
+
+Tudo fica na função `caminhoneiro` de `core.js`:
+
+- **Escolha gulosa:** o laço interno `while (j < n && b[j+1] - b[i] <= alcance + EPS) j++`
+  avança `j` até o ponto mais distante alcançável a partir de `b[i]`. Em seguida `i = j`
+  move o carro, e `paradas.push(i)` registra a parada, a não ser que `i` seja o destino
+  (`i === n`). A variável `alcance` começa valendo `c1` (C₁) e passa a `c2` (C₂) depois do
+  primeiro salto.
+- **Detecção de inviabilidade:** `if (j === i) return {viavel:false, paradas, bloqueio:i}`.
+  Se `j` não saiu do lugar, nem `b[i+1]` é alcançável, que é exatamente o caso da prova
+  acima.
+- **Hipótese de ordenação:** o laço pode parar no primeiro ponto inalcançável porque `b`
+  está ordenado. Quem garante isso é `planejar`, antes de chamar `caminhoneiro`.
+- A tolerância `EPS = 1e-9` só absorve erro de ponto flutuante. A prova supõe aritmética
+  exata.
+
+### Quando o guloso deixa de ser ótimo
+
+O argumento depende de duas coisas: o objetivo é só o **número** de paradas, e toda parada
+devolve o mesmo alcance C₂. Se o objetivo passar a ser o **menor tempo total** e cada
+estação tiver um tempo de recarga diferente (carregador rápido ou lento), a estação mais
+distante pode ser a mais lenta, e parar mais vezes em estações rápidas pode sair mais barato.
+Se a **recarga parcial** for permitida e o objetivo considerar tempo ou preço da energia, a
+decisão passa a incluir quanto carregar em cada estação, e o estado deixa de ser só a
+posição. Nesses casos é preciso outro método, como programação dinâmica ou caminho mínimo
+num grafo de trechos alcançáveis. Se o objetivo continuar sendo só o número de paradas,
+carregar até 100% nunca atrapalha e o guloso continua ótimo.
 
 ## Complexidade
+
+Seja n como na Modelagem: `b` tem n + 1 pontos (origem, n − 1 eletropostos e destino), então
+n é, na prática, o número de estações.
+
+**Preparação (`planejar`).** As estações **são ordenadas dentro de `planejar`**. Elas não
+precisam vir ordenadas em `dados.js`. A função remove repetidas com `new Set` (O(n)), filtra
+as que estão fora da rota com `filter` (O(n)) e ordena com `sort((a,b) => a-b)`
+(O(n log n)). Já `caminhoneiro` supõe que recebe `b` ordenado e não ordena nada.
+
+**Parte gulosa (`caminhoneiro`): O(n).** O índice `j`, que procura a próxima estação, só
+avança e nunca volta: cada iteração do laço externo começa com `j = i`, e `i` é o valor de
+`j` da iteração anterior. Assim `j` vai de 0 até no máximo n ao longo de toda a execução.
+Cada teste do laço interno ou incrementa `j` (no máximo n vezes no total) ou falha (uma vez
+por iteração externa, e há no máximo n iterações, porque `i` sempre aumenta), o que dá no
+máximo cerca de 2n comparações.
+
+**Total: O(n log n).** A ordenação domina. Se as estações já chegassem ordenadas, o
+algoritmo seria O(n).
+
+**Espaço: O(n).** A lista `paradas` guarda no máximo n − 1 índices. Os vetores auxiliares de
+`planejar` (`Set`, `est` e `b`) também ocupam O(n).
+
+| Etapa                         | Onde           | Tempo      |
+|-------------------------------|----------------|------------|
+| Remover repetidas e filtrar   | `planejar`     | O(n)       |
+| Ordenar                       | `planejar`     | O(n log n) |
+| Escolha gulosa                | `caminhoneiro` | O(n)       |
+| **Total**                     |                | **O(n log n)** |
+| Espaço                        |                | O(n)       |
 
 
 ## Como rodar
