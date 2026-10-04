@@ -203,8 +203,34 @@ algoritmo seria O(n).
 
 ## Como rodar
 
+O projeto é uma página estática (HTML, CSS e JavaScript puros). Não precisa instalar nada, nem ter servidor ou internet.
+
+1. Clone o repositório:
+
+2. Abra o arquivo `index.html` no navegador (duplo clique, ou `xdg-open index.html` no Linux).
+3. Escolha a rota e ajuste a autonomia, a bateria ao sair e a reserva de segurança. O resultado é recalculado na hora: número de paradas, diagrama da rota e tabela de trechos.
+
+Para testar uma rota inviável, escolha Brasília → São Paulo e reduza a autonomia até 40 km. A página mostra o trecho em vermelho e quantos km faltam.
+
+Se preferir abrir por um servidor local, também funciona:
+
+```bash
+python3 -m http.server 8000
+```
+
+Depois acesse `http://localhost:8000`.
 
 ## Limitações
+
+Este é um trabalho acadêmico e faz algumas simplificações:
+
+- **Dados de exemplo.** As estações e as posições em km das duas rotas (Brasília → Goiânia e Brasília → São Paulo) são aproximadas e ilustrativas. Não vêm de uma base real de eletropostos.
+- **Rota em linha reta.** A rota é tratada como uma reta de comprimento *L*. O desvio para sair da rodovia até a estação é ignorado.
+- **Diagrama esquemático.** A visualização mostra a rota e as paradas em linha. Não é um mapa geográfico.
+- **Recarga sempre completa.** Em cada parada o carro carrega até 100%. Não há recarga parcial nem tempo de recarga.
+- **Consumo constante.** A autonomia é a mesma em todo o trajeto. Não considera relevo, velocidade, clima ou carga do carro.
+- **Só minimiza o número de paradas.** O algoritmo guloso é ótimo para esse objetivo. Se o objetivo fosse o menor tempo total, ele deixaria de ser ótimo (veja a seção *Quando o guloso deixa de ser ótimo*).
+- **Sem testes automatizados.** A conferência foi feita manualmente, com casos conhecidos, por exemplo 3 paradas em Brasília → São Paulo com autonomia de 350 km, bateria de 100% e reserva de 10%.
 
 
 ## Estrutura do projeto
