@@ -17,6 +17,24 @@
     <label for="rota">Rota</label>
     <select id="rota"></select>
 
+    <div id="editor" class="editor" hidden>
+      <div class="row2">
+        <div><label for="eOrig">Origem</label><input id="eOrig" type="text" maxlength="40"></div>
+        <div><label for="eDest">Destino</label><input id="eDest" type="text" maxlength="40"></div>
+      </div>
+      <label for="eL">Distância total (km)</label>
+      <input id="eL" type="number" min="1" max="5000" step="any" inputmode="decimal">
+      <label for="eKm">Postos de recarga (km desde a origem)</label>
+      <div class="addrow">
+        <input id="eKm" type="number" min="0" step="any" inputmode="decimal" placeholder="ex.: 120">
+        <button id="eAdd" type="button" class="btn">Adicionar</button>
+      </div>
+      <p class="erro" id="eErr" role="alert"></p>
+      <ul id="eLista" class="chips"></ul>
+      <button id="eLimpar" type="button" class="btn ghost">Remover todos os postos</button>
+      <p class="hint">Também dá para tocar no diagrama para pôr um posto naquele ponto. Nada é salvo: ao recarregar a página, a rota personalizada some.</p>
+    </div>
+
     <label for="aut">Autonomia do carro <span class="val" id="autV"></span></label>
     <input id="aut" type="range" min="40" max="600" step="5">
 
@@ -48,6 +66,23 @@
       <thead><tr><th>De</th><th>Para</th><th class="r">Distância</th><th class="r">Bateria na chegada</th></tr></thead>
       <tbody id="tbody"></tbody>
     </table>
+  </section>
+
+  <section class="card full" aria-labelledby="custoT">
+    <strong id="custoT">Custo estimado da viagem</strong>
+    <div class="custo-in">
+      <div>
+        <label for="cTipo">Abastecimento</label>
+        <select id="cTipo">
+          <option value="gas">Gasolina (litros)</option>
+          <option value="ele">Elétrico (kWh)</option>
+        </select>
+      </div>
+      <div><label for="cCons" id="cConsL"></label><input id="cCons" type="number" min="0.1" step="0.1" inputmode="decimal"></div>
+      <div><label for="cPreco" id="cPrecoL"></label><input id="cPreco" type="number" min="0" step="0.01" inputmode="decimal"></div>
+    </div>
+    <div id="relatorio" class="relatorio" aria-live="polite"></div>
+    <p class="hint">Estimativa simples, com consumo constante: um tanque (ou bateria) cheio rende a autonomia escolhida acima, e cada parada completa o que foi gasto desde a anterior. Consumo e preço são valores médios de referência; ajuste para o seu carro e a sua região.</p>
   </section>
 </main>
 

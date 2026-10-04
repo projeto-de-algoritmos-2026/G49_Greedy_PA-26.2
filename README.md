@@ -7,7 +7,8 @@ o menor número possível de recargas. Para isso usa o algoritmo do Caminhoneiro
 
 ## Demo
 
-<!-- link a preencher -->
+Versão publicada no GitHub Pages (branch `main`, pasta raiz):
+**<https://projeto-de-algoritmos-2026.github.io/G49_Greedy_PA-26.2/>**
 
 ## O problema real
 
@@ -83,6 +84,66 @@ O detalhamento dessas limitações está em [Limitações](#limitações).
 
 ## Exemplo
 
+Resultado das duas rotas de `dados.js` com os valores que a página usa ao abrir: autonomia
+igual à `sugestao` da rota, bateria ao sair 100% e reserva 10%. Os números abaixo são os
+mesmos que a página mostra na tabela "Trechos da viagem".
+
+Legenda: `■` origem/destino · `●` parada de recarga · `○` estação ignorada.
+
+### Brasília → Goiânia (L = 209 km, C = 150 km)
+
+C₁ = C₂ = 150 · (1 − 0,10) = 135 km.
+
+```
+km   0      38     72     95     131    160    186    209
+     ■──────○──────○──────○──────●──────○──────○──────■
+     Brasília                 parada            Goiânia
+     └────────── 131 km ─────────┘└────── 78 km ──────┘
+```
+
+- No km 0 o carro alcança até o km 135: estações 38, 72, 95 e 131. O guloso escolhe a mais
+  distante, **km 131**.
+- No km 131 alcança até o km 266, que passa de 209: segue direto para Goiânia.
+
+**1 parada** (km 131).
+
+| De             | Para           | Distância | Bateria na chegada |
+|----------------|----------------|----------:|-------------------:|
+| Brasília       | Estação km 131 |    131 km |                13% |
+| Estação km 131 | Goiânia        |     78 km |                48% |
+
+### Brasília → São Paulo (L = 1015 km, C = 350 km)
+
+C₁ = C₂ = 350 · (1 − 0,10) = 315 km.
+
+```
+Brasília ══285 km══▶ ● km 285 ══275 km══▶ ● km 560 ══270 km══▶ ● km 830 ══185 km══▶ São Paulo
+ (km 0)                                                                            (km 1015)
+
+ignoradas:  60 110 170 230 │ 330 390 440 505 │ 610 665 720 770 │ 880 940 985
+```
+
+| Posição atual | Alcança até | Mais distante alcançável  | Primeira fora do alcance |
+|---------------|-------------|---------------------------|--------------------------|
+| km 0          | km 315      | **km 285**                | km 330                   |
+| km 285        | km 600      | **km 560**                | km 610                   |
+| km 560        | km 875      | **km 830**                | km 880                   |
+| km 830        | km 1145     | destino (km 1015)         | —                        |
+
+**3 paradas** (km 285, 560 e 830).
+
+| De             | Para           | Distância | Bateria na chegada |
+|----------------|----------------|----------:|-------------------:|
+| Brasília       | Estação km 285 |    285 km |                19% |
+| Estação km 285 | Estação km 560 |    275 km |                21% |
+| Estação km 560 | Estação km 830 |    270 km |                23% |
+| Estação km 830 | São Paulo      |    185 km |                47% |
+
+### Rota inviável
+
+Em Brasília → São Paulo com autonomia de 40 km (reserva 10%), C₁ = C₂ = 36 km, mas a
+primeira estação fica no km 60. `planejar` devolve `viavel: false` e `bloqueio: 0`, e a
+página mostra o trecho km 0 → km 60 em vermelho: "faltam 24 km de autonomia".
 
 ## Prova de otimalidade
 
@@ -201,24 +262,71 @@ algoritmo seria O(n).
 | Espaço                        |                | O(n)       |
 
 
-## Como rodar
+## Como rodar e testar
 
 O projeto é uma página estática (HTML, CSS e JavaScript puros). Não precisa instalar nada, nem ter servidor ou internet.
 
+O jeito mais rápido é abrir a [demo publicada](https://projeto-de-algoritmos-2026.github.io/G49_Greedy_PA-26.2/). Para rodar no seu computador:
+
+### Abrir direto no navegador
+
 1. Clone o repositório:
 
-2. Abra o arquivo `index.html` no navegador (duplo clique, ou `xdg-open index.html` no Linux).
+   ```bash
+   git clone https://github.com/projeto-de-algoritmos-2026/G49_Greedy_PA-26.2.git
+   cd G49_Greedy_PA-26.2
+   ```
+
+2. Abra o arquivo `index.html` no navegador (duplo clique, ou `xdg-open index.html` no Linux, `open index.html` no macOS, `start index.html` no Windows).
 3. Escolha a rota e ajuste a autonomia, a bateria ao sair e a reserva de segurança. O resultado é recalculado na hora: número de paradas, diagrama da rota e tabela de trechos.
 
 Para testar uma rota inviável, escolha Brasília → São Paulo e reduza a autonomia até 40 km. A página mostra o trecho em vermelho e quantos km faltam.
 
-Se preferir abrir por um servidor local, também funciona:
+Abrir direto (`file://`) funciona porque a página só usa `<script>` comuns, sem módulos ES, sem `fetch` e sem caminhos absolutos.
+
+### Rodar com servidor local
+
+Se preferir abrir por um servidor local, também funciona. Na pasta do projeto:
 
 ```bash
 python3 -m http.server 8000
 ```
 
+No Windows o comando costuma ser `python -m http.server 8000`. Com Node instalado, `npx serve` também serve (ele mostra a porta no terminal).
+
 Depois acesse `http://localhost:8000`.
+
+### Testar o núcleo no Node
+
+O algoritmo (`core.js`) não depende da página. Com Node.js instalado, rode na pasta do projeto (sem instalar pacotes):
+
+```bash
+node -e "globalThis.window = globalThis; const fs = require('fs'); const ROTAS = eval(fs.readFileSync('dados.js', 'utf8') + ';ROTAS'); eval(fs.readFileSync('core.js', 'utf8')); for (const r of ROTAS) { const p = Caminhoneiro.planejar(r, r.sugestao, 1, 0.1); console.log(r.nome, '| autonomia', r.sugestao, '| viavel:', p.viavel, '| paradas (km):', p.paradas.map(i => p.b[i])); }"
+```
+
+Saída esperada (a mesma da seção [Exemplo](#exemplo)):
+
+```
+Brasília → Goiânia | autonomia 150 | viavel: true | paradas (km): [ 131 ]
+Brasília → São Paulo | autonomia 350 | viavel: true | paradas (km): [ 285, 560, 830 ]
+```
+
+O comando funciona no Bash, no Git Bash e no PowerShell. Para testar outro caso, troque os
+argumentos de `planejar(rota, autonomia, bateriaIni, reserva)`; bateria e reserva são frações
+(`1` = 100%, `0.1` = 10%).
+
+### Checklist de teste manual
+
+| # | O que fazer | O que deve aparecer |
+|---|-------------|---------------------|
+| 1 | Abrir a página. | Rota Brasília → Goiânia, autonomia 150 km, bateria 100%, reserva 10%. "**1** parada de recarga", "Alcance útil: 135 km no primeiro trecho e 135 km nos demais". No diagrama, só a estação do km 131 em verde. Tabela com 2 trechos: 131 km (13%) e 78 km (48%). |
+| 2 | Trocar a rota para Brasília → São Paulo. | A autonomia muda sozinha para 350 km. "**3** paradas de recarga", nos km 285, 560 e 830. Tabela com 4 trechos. |
+| 3 | Em São Paulo, subir a autonomia para 600 km. | "**1** parada de recarga", no km 505. |
+| 4 | Em São Paulo, descer a autonomia para 40 km. | "Rota inviável", arco vermelho tracejado do km 0 ao km 60 e a mensagem "faltam 24 km de autonomia entre o km 0 e o km 60". Na tabela, o trecho aparece como "sem bateria". |
+| 5 | Voltar para Goiânia e subir a autonomia para 235 km. | "**0** paradas de recarga" e "Dá para ir direto, sem recarregar." |
+| 6 | Em Goiânia, autonomia 150 km, bateria ao sair 30%. Depois 50%. | Com 30%: inviável, "Alcance útil: 30 km no primeiro trecho e 135 km nos demais", faltam 8 km até o km 38. Com 50%: "**2** paradas", nos km 38 e 160 (C₁ = 60 km, C₂ = 135 km). |
+| 7 | Em Goiânia, autonomia 150 km, bateria 100%, reserva 30%. | "**2** paradas", nos km 95 e 186 (alcance útil de 105 km). |
+| 8 | Abrir no celular (ou no modo responsivo do navegador, ~375 px de largura). | Controles e resultado em uma coluna, a dica "Arraste o diagrama para os lados" aparece, o diagrama rola na horizontal sem a página inteira rolar para o lado, e a tabela cabe na tela. |
 
 ## Limitações
 
@@ -242,10 +350,17 @@ Este é um trabalho acadêmico e faz algumas simplificações:
 | `dados.js`   | rotas de exemplo (`ROTAS`)                                      |
 | `core.js`    | algoritmo do Caminhoneiro (`caminhoneiro`, `planejar`)          |
 | `app.js`     | interface: lê os controles, chama `planejar`, desenha diagrama e tabela |
+| `README.md`  | esta documentação                                               |
+
+O `index.html` carrega os scripts nesta ordem: `dados.js` (define `ROTAS`), `core.js`
+(define `window.Caminhoneiro`) e `app.js` (usa os dois). São scripts comuns, sem módulos e
+sem dependências externas.
 
 ## Autores
 
+Projeto de Algoritmos, UnB/FCTE, semestre 2026/2, Grupo 49.
+
 | Integrante                       | GitHub                                         | Contribuição |
 | -------------------------------- | ---------------------------------------------- | ------------ |
-| Samuel Rodrigues Viana Lobo      | [@Samuelvlobo](https://github.com/Samuelvlobo) |         |
-| Gabriel Sampaio Fae              | [@Faehzin](https://github.com/Faehzin)         |         |
+| Samuel Rodrigues Viana Lobo      | [@Samuelvlobo](https://github.com/Samuelvlobo) | Interface e dados: versão inicial da página, separação em `style.css`, `dados.js` e `app.js`, ajustes para celular e mensagens de rota inviável; seções *Como rodar* e *Limitações* |
+| Gabriel Sampaio Fae              | [@Faehzin](https://github.com/Faehzin)         | Algoritmo e teoria: `core.js` (`caminhoneiro` e `planejar`), modelagem, prova de otimalidade e complexidade no README |
