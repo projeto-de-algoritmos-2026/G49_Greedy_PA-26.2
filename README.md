@@ -360,6 +360,12 @@ sem dependências externas.
 
 Projeto de Algoritmos, UnB/FCTE, semestre 2026/2, Grupo 49.
 
+## Vídeo de apresentação
+
+https://youtu.be/iW7vl0ybRUo
+
+
+
 | Integrante                       | GitHub                                         | Contribuição |
 | -------------------------------- | ---------------------------------------------- | ------------ |
 | Samuel Rodrigues Viana Lobo      | [@Samuelvlobo](https://github.com/Samuelvlobo) | Interface e dados: versão inicial da página, separação em `style.css`, `dados.js` e `app.js`, ajustes para celular e mensagens de rota inviável; seções *Como rodar* e *Limitações* |
